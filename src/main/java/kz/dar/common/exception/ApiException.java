@@ -8,22 +8,26 @@ public class ApiException extends RuntimeException {
 
     private int status = 500;
     private ErrorCode errorCode;
+    private ErrorSourceSystem system;
 
-    public ApiException(int status, ErrorCode errorCode) {
+    public ApiException(int status, ErrorCode errorCode, ErrorSourceSystem system) {
         this.status = status;
         this.errorCode = errorCode;
+        this.system = system;
     }
 
-    public ApiException(int status, ErrorCode errorCode, Throwable throwable) {
+    public ApiException(int status, ErrorCode errorCode, Throwable throwable, ErrorSourceSystem system) {
         super(throwable);
         this.errorCode = errorCode;
         this.status = status;
+        this.system = system;
     }
 
-    public ApiException(int status, ErrorCode errorCode, String message) {
+    public ApiException(int status, ErrorCode errorCode, String message, ErrorSourceSystem system) {
         super(message);
         this.errorCode = errorCode;
         this.status = status;
+        this.system = system;
     }
 
     public int getStatus() {
@@ -37,15 +41,17 @@ public class ApiException extends RuntimeException {
     @Override
     public String getMessage() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Status: ").append(status).append(" ");
-        sb.append("Error code: ").append(errorCode).append(" ");
-        sb.append("FUll code: ").append(getFullCode());
+        sb.append("Status: ").append(status).append(", ");
+        sb.append("Error code: ").append(errorCode).append(", ");
+        sb.append("Full code: ").append(system).append(".")
+                .append(ErrorUtils.generateFullCode(status, errorCode)).append(", ");
+        sb.append("Exception message: ").append(super.getMessage());
 
         return sb.toString();
     }
 
     public ErrorInfo getErrorInfo(ErrorLocaleContext context) {
-        long fullCode = getFullCode();
+        long fullCode = ErrorUtils.generateFullCode(status, errorCode);
         String errorURL = "docs/"+fullCode;
         String localizedMessage;
         if(context != null) {
@@ -54,15 +60,8 @@ public class ApiException extends RuntimeException {
             localizedMessage = getMessage();
         }
 
-        ErrorInfo errorInfo = new ErrorInfo(getStatus(), getErrorCode().getSeries().getSeries(), fullCode, localizedMessage,
+        ErrorInfo errorInfo = new ErrorInfo(system, getStatus(), getErrorCode().getSeries().getSeries(), fullCode, localizedMessage,
                 getMessage(), errorURL);
         return errorInfo;
-    }
-
-    private long getFullCode(){
-        long eCode = status * 100;
-        eCode = eCode + getErrorCode().getSeries().getSeries();
-        eCode = (eCode * 1000) + getErrorCode().getCode();
-        return eCode;
     }
 }
