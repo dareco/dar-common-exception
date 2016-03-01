@@ -15,6 +15,17 @@
         <spring-context.version>4.2.5.RELEASE</spring-context.version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>artifactory</id>
+            <url>http://54.229.103.37/artifactory/sbt-local/</url>
+        </repository>
+        <snapshotRepository>
+            <id>artifactory</id>
+            <url>http://54.229.103.37/artifactory/sbt-local/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
